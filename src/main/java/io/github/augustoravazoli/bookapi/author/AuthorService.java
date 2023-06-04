@@ -20,4 +20,10 @@ class AuthorService {
     return authorRepository.save(author);
   }
 
+  public Author findAuthor(long id) {
+    return authorRepository
+      .findById(id)
+      .orElseThrow(() -> new AuthorNotFoundException(id));
+  }
+
 }

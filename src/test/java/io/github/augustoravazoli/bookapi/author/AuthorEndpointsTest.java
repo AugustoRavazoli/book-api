@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -110,6 +111,45 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       return requestFields(
         fields.path("name").description("Author's name"),
         fields.path("email").description("Author's email")
+      );
+    }
+
+  }
+
+  @Nested
+  @DisplayName("Author find scenarios")
+  class FindAuthorEndpointTests {
+
+    @Test
+    @DisplayName("Find author with success")
+    void whenFindAuthor_thenReturns200() throws Exception {
+      // given
+      var author = authorRepository.save(new Author(null, "J.R.R. Tolkien", "tolkien@example.com"));
+      var id = author.getId().intValue();
+      // when
+      client.perform(get("/api/v1/authors/{id}", id))
+      // then
+      .andExpectAll(
+        status().isOk(),
+        jsonPath("$.id", is(id)),
+        jsonPath("$.name", is("J.R.R. Tolkien")),
+        jsonPath("$.email", is("tolkien@example.com"))
+      )
+      .andDo(document("author/find"));    
+    }
+
+    @Test
+    @DisplayName("Don't find author when author doesn't exists")
+    void givenNonExistentAuthor_whenFindAuthor_thenReturns404() throws Exception {
+      // given
+      var id = 1;
+      // when
+      client.perform(get("/api/v1/authors/{id}", id))
+      // then
+      .andExpectAll(
+        status().isNotFound(),
+        jsonPath("$.message", is("Author with given id \"1\" doesn't exists")),
+        jsonPath("$.details").doesNotExist()
       );
     }
 

@@ -3,6 +3,8 @@ package io.github.augustoravazoli.bookapi.author;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,6 +41,16 @@ class AuthorController {
       .buildAndExpand(savedAuthor.id())
       .toUri();
     return ResponseEntity.created(location).body(savedAuthor);
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<?> findAuthor(@PathVariable long id) {
+    var author = Stream.of(id)
+      .map(authorService::findAuthor)
+      .map(authorMapper::toResponse)
+      .findAny()
+      .get();
+    return ResponseEntity.ok(author);
   }
 
 }
