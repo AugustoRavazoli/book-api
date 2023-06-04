@@ -16,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -151,6 +152,117 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
         jsonPath("$.message", is("Author with given id \"1\" doesn't exists")),
         jsonPath("$.details").doesNotExist()
       );
+    }
+
+  }
+
+  @Nested
+  @DisplayName("Author edit scenarios")
+  class EditAuthorEndpointTests {
+
+    private Author author;
+
+    @BeforeEach
+    void setUp() {
+      var newAuthor = new Author(null, "J.R.R. Tolkien", "tolkien@example.com");
+      author = authorRepository.save(newAuthor);
+    }
+
+    @Test
+    @DisplayName("Edit author with success")
+    void whenEditAuthor_thenReturns200() throws Exception {
+      // given
+      var newAuthor = new AuthorRequest("C.S. Lewis", "cslewis@example.com");
+      // when
+      client.perform(put("/api/v1/authors/{id}", author.getId())
+        .contentType(APPLICATION_JSON)
+        .content(toJson(newAuthor))
+      )
+      // then
+      .andExpectAll(
+        status().isOk(),
+        jsonPath("$.id", is(author.getId().intValue())),
+        jsonPath("$.name", is("C.S. Lewis")),
+        jsonPath("$.email", is("cslewis@example.com"))
+      )
+      .andDo(document("author/edit"));
+      // and
+      assertThat(authorRepository.count()).isEqualTo(1);
+      assertThat(authorRepository.findById(author.getId()).get())
+        .usingRecursiveComparison()
+        .isNotEqualTo(author);
+    }
+
+    @Test
+    @DisplayName("Don't edit author when author doesn't exists")
+    void givenNonexistentAuthor_whenEditAuthor_thenReturns404() throws Exception {
+      // given
+      authorRepository.delete(author);
+      // and
+      var newAuthor = new AuthorRequest("C.S. Lewis", "cslewis@example.com");
+      // when
+      client.perform(put("/api/v1/authors/{id}", 1)
+        .contentType(APPLICATION_JSON)
+        .content(toJson(newAuthor))
+      )
+      // then
+      .andExpectAll(
+        status().isNotFound(),
+        jsonPath("$.message", is("Author with given id \"1\" doesn't exists")),
+        jsonPath("$.details").doesNotExist()
+      );
+      assertThat(authorRepository.count()).isZero();
+    }
+
+    @Test
+    @DisplayName("Don't edit author when email is already in use by other author")
+    void givenEmailTaken_whenEditAuthor_thenReturns409() throws Exception {
+      // given
+      authorRepository.save(new Author(null, "", "cslewis@example.com"));
+      // and
+      var newAuthor = new AuthorRequest("C.S. Lewis", "cslewis@example.com");
+      // when
+      client.perform(put("/api/v1/authors/{id}", author.getId())
+        .contentType(APPLICATION_JSON)
+        .content(toJson(newAuthor))
+      )
+      // then
+      .andExpectAll(
+        status().isConflict(),
+        jsonPath("$.message", is("Email \"cslewis@example.com\" already in use")),
+        jsonPath("$.details").doesNotExist()
+      );
+      assertThat(authorRepository.count()).isEqualTo(2);
+      assertThat(authorRepository.findById(author.getId()).get())
+        .usingRecursiveComparison()
+        .isEqualTo(author);
+    }
+
+    @Test
+    @DisplayName("Don't edit author when new author information are invalid")
+    void givenInvalidAuthor_whenEditAuthor_thenReturns422() throws Exception {
+      // given
+      var newAuthor = new AuthorRequest("", "\n"); // using "\n" to trigger both @Email and @NotBlank validations
+      // when                                      // avoiding the need to parameterize this test
+      client.perform(put("/api/v1/authors/{id}", author.getId())
+        .contentType(APPLICATION_JSON)
+        .content(toJson(newAuthor))
+      )
+      // then
+      .andExpectAll(
+        status().isUnprocessableEntity(),
+        jsonPath("$.message", is("Validation errors on your request")),
+        jsonPath("$.details", hasSize(3)),
+        jsonPath("$.details", containsInAnyOrder(
+          violation("name", "must not be blank"),
+          violation("email", "must not be blank"),
+          violation("email", "must be a well-formed email address")
+        ))
+      );
+      assertThat(authorRepository.count()).isEqualTo(1);
+      assertThat(authorRepository.findById(author.getId()).get())
+        .usingRecursiveComparison()
+        .isEqualTo(author);
     }
 
   }

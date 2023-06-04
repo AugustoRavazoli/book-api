@@ -26,4 +26,20 @@ class AuthorService {
       .orElseThrow(() -> new AuthorNotFoundException(id));
   }
 
+  public Author editAuthor(long id, Author newAuthor) {
+    return authorRepository
+      .findById(id)
+      .map(author -> {
+        if (!newAuthor.getEmail().equals(author.getEmail()) 
+          && authorRepository.existsByEmail(newAuthor.getEmail())
+        ) {
+          throw new EmailAlreadyInUseException(newAuthor.getEmail());
+        }
+        author.setName(newAuthor.getName());
+        author.setEmail(newAuthor.getEmail());
+        return authorRepository.save(author);
+      })
+      .orElseThrow(() -> new AuthorNotFoundException(id));
+  }
+
 }

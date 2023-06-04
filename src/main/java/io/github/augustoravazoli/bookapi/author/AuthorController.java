@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.stereotype.Controller;
@@ -51,6 +52,17 @@ class AuthorController {
       .findAny()
       .get();
     return ResponseEntity.ok(author);
+  }
+
+  @PutMapping("/{id}")
+  public ResponseEntity<?> editAuthor(@PathVariable long id, @Valid @RequestBody AuthorRequest newAuthor) {
+    var editedAuthor = Stream.of(newAuthor)
+      .map(authorMapper::toEntity)
+      .map(author -> authorService.editAuthor(id, author))
+      .map(authorMapper::toResponse)
+      .findAny()
+      .get();
+    return ResponseEntity.ok(editedAuthor);
   }
 
 }
