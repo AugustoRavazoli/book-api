@@ -48,4 +48,11 @@ class BookService {
       .orElseThrow(() -> new BookNotFoundException(id));
   }
 
+  public void deleteBook(long id) {
+    if (!bookRepository.existsById(id)) {
+      throw new BookNotFoundException(id);
+    }
+    bookRepository.deleteById(id);
+  }
+
 }

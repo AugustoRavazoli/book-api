@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -319,6 +320,45 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       assertThat(bookRepository.findById(book.getId()).get())
         .usingRecursiveComparison()
         .isEqualTo(book);
+    }
+
+  }
+
+  @Nested
+  @DisplayName("Book delete scenarios")
+  class DeleteBookEndpointTests {
+
+    @Test
+    @DisplayName("Delete book with success")
+    void whenDeleteBook_thenReturns204() throws Exception {
+      // given
+      var book = bookRepository.save(new Book(null, "The Lord of the Rings", "Fantasy", "9780544003415", true));
+      var id = book.getId().intValue();
+      // when
+      client.perform(delete("/api/v1/books/{id}", id))
+      // then
+      .andExpectAll(
+        status().isNoContent(),
+        jsonPath("$").doesNotExist()
+      )
+      .andDo(document("book/delete"));
+      // and
+      assertThat(bookRepository.count()).isZero();
+    }
+
+    @Test
+    @DisplayName("Don't delete book when book doesn't exists")
+    void givenNonexistentBook_whenDeleteBook_thenReturns404() throws Exception {
+      // given
+      var id = 1;
+      // when
+      client.perform(delete("/api/v1/books/{id}", id))
+      // then
+      .andExpectAll(
+        status().isNotFound(),
+        jsonPath("$.message", is("Book with given id \"1\" doesn't exists")),
+        jsonPath("$.details").doesNotExist()
+      );
     }
 
   }
