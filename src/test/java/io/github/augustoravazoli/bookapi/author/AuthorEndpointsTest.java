@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -263,6 +264,45 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       assertThat(authorRepository.findById(author.getId()).get())
         .usingRecursiveComparison()
         .isEqualTo(author);
+    }
+
+  }
+
+  @Nested
+  @DisplayName("Author delete scenarios")
+  class DeleteAuthorEndpointTests {
+
+    @Test
+    @DisplayName("Delete author with success")
+    void whenDeleteAuthor_thenReturns204() throws Exception {
+      // given
+      var author = authorRepository.save(new Author(null, "J.R.R. Tolkien", "tolkien@example.com"));
+      var id = author.getId().intValue();
+      // when
+      client.perform(delete("/api/v1/authors/{id}", id))
+      // then
+      .andExpectAll(
+        status().isNoContent(),
+        jsonPath("$").doesNotExist()
+      )
+      .andDo(document("author/delete"));
+      // and
+      assertThat(authorRepository.count()).isZero();
+    }
+
+    @Test
+    @DisplayName("Don't delete author when author doesn't exists")
+    void givenNonexistentAuthor_whenDeleteAuthor_thenReturns404() throws Exception {
+      // given
+      var id = 1;
+      // when
+      client.perform(delete("/api/v1/authors/{id}", id))
+      // then
+      .andExpectAll(
+        status().isNotFound(),
+        jsonPath("$.message", is("Author with given id \"1\" doesn't exists")),
+        jsonPath("$.details").doesNotExist()
+      );
     }
 
   }

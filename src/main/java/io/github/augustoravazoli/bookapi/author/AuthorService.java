@@ -42,4 +42,11 @@ class AuthorService {
       .orElseThrow(() -> new AuthorNotFoundException(id));
   }
 
+  public void deleteAuthor(long id) {
+    if (!authorRepository.existsById(id)) {
+      throw new AuthorNotFoundException(id);
+    }
+    authorRepository.deleteById(id);
+  }
+
 }
