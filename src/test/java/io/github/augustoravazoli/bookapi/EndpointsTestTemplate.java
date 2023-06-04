@@ -25,7 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ExtendWith(RestDocumentationExtension.class)
-public abstract class ControllerTestTemplate {
+public abstract class EndpointsTestTemplate {
 
   protected MockMvc client;
 

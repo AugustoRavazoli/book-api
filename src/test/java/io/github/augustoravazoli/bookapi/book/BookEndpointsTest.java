@@ -22,10 +22,10 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
-import io.github.augustoravazoli.bookapi.ControllerTestTemplate;
+import io.github.augustoravazoli.bookapi.EndpointsTestTemplate;
 
 @SpringBootTest
-class BookControllerTest extends ControllerTestTemplate {
+class BookEndpointsTest extends EndpointsTestTemplate {
 
   @Autowired
   private BookRepository bookRepository;
@@ -37,7 +37,7 @@ class BookControllerTest extends ControllerTestTemplate {
 
   @Nested
   @DisplayName("Book creation scenarios")
-  class CreateBookTests {
+  class CreateBookEndpointTests {
 
     @Test
     @DisplayName("Create book with success")
