@@ -23,4 +23,10 @@ class BookService {
     return bookRepository.save(book);
   }
 
+  public Book findBook(long id) {
+    return bookRepository
+      .findById(id)
+      .orElseThrow(() -> new BookNotFoundException(id));
+  }
+
 }

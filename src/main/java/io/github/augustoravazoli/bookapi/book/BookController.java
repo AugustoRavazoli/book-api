@@ -3,6 +3,8 @@ package io.github.augustoravazoli.bookapi.book;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +38,16 @@ class BookController {
       .buildAndExpand(savedBook.id())
       .toUri();
     return ResponseEntity.created(location).body(savedBook);
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<?> findBook(@PathVariable long id) {
+    var book = Stream.of(id)
+      .map(bookService::findBook)
+      .map(bookMapper::toResponse)
+      .findAny()
+      .get();
+    return ResponseEntity.ok(book);
   }
 
 }

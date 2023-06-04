@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -136,6 +137,47 @@ class BookEndpointsTest extends EndpointsTestTemplate {
         fields.path("description").description("Book's description"),
         fields.path("isbn").description("Book's ISBN"),
         fields.path("published").description("Book's publication state")
+      );
+    }
+
+  }
+
+  @Nested
+  @DisplayName("Book find scenarios")
+  class FindBookEndpointTests {
+
+    @Test
+    @DisplayName("Find book with success")
+    void whenFindBook_thenReturns200() throws Exception {
+      // given
+      var book = bookRepository.save(new Book(null, "The Lord of the Rings", "Fantasy", "9780544003415", true));
+      var id = book.getId().intValue();
+      // when
+      client.perform(get("/api/v1/books/{id}", id))
+      // then
+      .andExpectAll(
+        status().isOk(),
+        jsonPath("$.id", is(id)),
+        jsonPath("$.title", is("The Lord of the Rings")),
+        jsonPath("$.description", is("Fantasy")),
+        jsonPath("$.isbn", is("9780544003415")),
+        jsonPath("$.published", is(true))
+      )
+      .andDo(document("book/find"));    
+    }
+
+    @Test
+    @DisplayName("Don't find book when book doesn't exists")
+    void givenNonExistentBook_whenFindBook_thenReturns404() throws Exception {
+      // given
+      var id = 1;
+      // when
+      client.perform(get("/api/v1/books/{id}", id))
+      // then
+      .andExpectAll(
+        status().isNotFound(),
+        jsonPath("$.message", is("Book with given id \"1\" doesn't exists")),
+        jsonPath("$.details").doesNotExist()
       );
     }
 
