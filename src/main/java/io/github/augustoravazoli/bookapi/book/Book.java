@@ -44,16 +44,32 @@ class Book {
     return title;
   }
 
+  protected void setTitle(String title) {
+    this.title = title;
+  }
+
   public String getDescription() {
     return description;
+  }
+
+  protected void setDescription(String description) {
+    this.description = description;
   }
 
   public String getIsbn() {
     return isbn;
   }
 
+  protected void setIsbn(String isbn) {
+    this.isbn = isbn;
+  }
+
   public boolean isPublished() {
     return published;
+  }
+
+  protected void setPublished(boolean published) {
+    this.published = published;
   }
 
 }

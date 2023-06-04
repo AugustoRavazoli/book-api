@@ -29,4 +29,23 @@ class BookService {
       .orElseThrow(() -> new BookNotFoundException(id));
   }
 
+  public Book editBook(long id, Book newBook) {
+    return bookRepository
+      .findById(id)
+      .map(book -> {
+        if (!newBook.getTitle().equals(book.getTitle()) && bookRepository.existsByTitle(newBook.getTitle())) {
+          throw new TitleAlreadyInUseException(newBook.getTitle());
+        }
+        if (!newBook.getIsbn().equals(book.getIsbn()) && bookRepository.existsByIsbn(newBook.getIsbn())) {
+          throw new IsbnAlreadyInUseException(newBook.getIsbn());
+        }
+        book.setTitle(newBook.getTitle());
+        book.setDescription(newBook.getDescription());
+        book.setIsbn(newBook.getIsbn());
+        book.setPublished(newBook.isPublished());
+        return bookRepository.save(book);
+      })
+      .orElseThrow(() -> new BookNotFoundException(id));
+  }
+
 }
