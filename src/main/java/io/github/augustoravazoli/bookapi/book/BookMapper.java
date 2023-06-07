@@ -7,7 +7,6 @@ class BookMapper {
 
   public Book toEntity(BookRequest bookRequest) {
     return new Book(
-      null,
       bookRequest.title(),
       bookRequest.description(),
       bookRequest.isbn(),

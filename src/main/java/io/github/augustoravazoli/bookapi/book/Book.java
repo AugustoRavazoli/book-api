@@ -28,8 +28,7 @@ class Book {
 
   public Book() {}
 
-  public Book(Long id, String title, String description, String isbn, boolean published) {
-    this.id = id;
+  public Book(String title, String description, String isbn, boolean published) {
     this.title = title;
     this.description = description;
     this.isbn = isbn;

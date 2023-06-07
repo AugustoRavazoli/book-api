@@ -68,7 +68,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
     @DisplayName("Don't create author when email is already in use")
     void givenEmailTaken_whenCreateAuthor_thenReturns409() throws Exception {
       // given
-      authorRepository.save(new Author(null, "J.R.R. Tolkien", "tolkien@example.com"));
+      authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
       var newAuthor = new AuthorRequest("C.S. Lewis", "tolkien@example.com");
       // when
       client.perform(post("/api/v1/authors")
@@ -126,7 +126,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
     @DisplayName("Find author with success")
     void whenFindAuthor_thenReturns200() throws Exception {
       // given
-      var author = authorRepository.save(new Author(null, "J.R.R. Tolkien", "tolkien@example.com"));
+      var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
       var id = author.getId().intValue();
       // when
       client.perform(get("/api/v1/authors/{id}", id))
@@ -165,7 +165,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
 
     @BeforeEach
     void setUp() {
-      var newAuthor = new Author(null, "J.R.R. Tolkien", "tolkien@example.com");
+      var newAuthor = new Author("J.R.R. Tolkien", "tolkien@example.com");
       author = authorRepository.save(newAuthor);
     }
 
@@ -219,7 +219,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
     @DisplayName("Don't edit author when email is already in use by other author")
     void givenEmailTaken_whenEditAuthor_thenReturns409() throws Exception {
       // given
-      authorRepository.save(new Author(null, "", "cslewis@example.com"));
+      authorRepository.save(new Author("", "cslewis@example.com"));
       // and
       var newAuthor = new AuthorRequest("C.S. Lewis", "cslewis@example.com");
       // when
@@ -276,7 +276,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
     @DisplayName("Delete author with success")
     void whenDeleteAuthor_thenReturns204() throws Exception {
       // given
-      var author = authorRepository.save(new Author(null, "J.R.R. Tolkien", "tolkien@example.com"));
+      var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
       var id = author.getId().intValue();
       // when
       client.perform(delete("/api/v1/authors/{id}", id))

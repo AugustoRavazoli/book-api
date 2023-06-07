@@ -70,7 +70,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
     @DisplayName("Don't create book when title is already in use")
     void givenTitleTaken_whenCreateBook_thenReturns409() throws Exception {
       // given
-      bookRepository.save(new Book(null, "The Lord of the Rings", "Fantasy", "9780544003415", true));
+      bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       var newBook = new BookRequest("The Lord of the Rings", "Fantasy", "9780008376055", false);
       // when
       client.perform(post("/api/v1/books")
@@ -90,7 +90,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
     @DisplayName("Don't create book when ISBN is already in use")
     void givenIsbnTaken_whenCreateBook_thenReturns409() throws Exception {
       // given
-      bookRepository.save(new Book(null, "The Lord of the Rings", "Fantasy", "9780544003415", true));
+      bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       var newBook = new BookRequest("The Hobbit", "Fantasy", "9780544003415", false);
       // when
       client.perform(post("/api/v1/books")
@@ -152,7 +152,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
     @DisplayName("Find book with success")
     void whenFindBook_thenReturns200() throws Exception {
       // given
-      var book = bookRepository.save(new Book(null, "The Lord of the Rings", "Fantasy", "9780544003415", true));
+      var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       var id = book.getId().intValue();
       // when
       client.perform(get("/api/v1/books/{id}", id))
@@ -193,7 +193,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
 
     @BeforeEach
     void setUp() {
-      var newBook = new Book(null, "The Lord of the Rings", "Fantasy", "9780544003415", true);
+      var newBook = new Book("The Lord of the Rings", "Fantasy", "9780544003415", true);
       book = bookRepository.save(newBook);
     }
 
@@ -249,7 +249,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
     @DisplayName("Don't edit book when title is already in use by other book")
     void givenTitleTaken_whenEditBook_thenReturns409() throws Exception {
       // given
-      bookRepository.save(new Book(null, "The Hobbit", "", "", false));
+      bookRepository.save(new Book("The Hobbit", "", "", false));
       // and
       var newBook = new BookRequest("The Hobbit", "Some detailed description", "9780008376055", false);
       // when
@@ -273,7 +273,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
     @DisplayName("Don't edit book when ISBN is already in use by other book")
     void givenIsbnTaken_whenEditBook_thenReturns409() throws Exception {
       // given
-      bookRepository.save(new Book(null, "", "", "9780008376055", false));
+      bookRepository.save(new Book("", "", "9780008376055", false));
       // and
       var newBook = new BookRequest("The Hobbit", "Some detailed description", "9780008376055", false);
       // when
@@ -332,7 +332,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
     @DisplayName("Delete book with success")
     void whenDeleteBook_thenReturns204() throws Exception {
       // given
-      var book = bookRepository.save(new Book(null, "The Lord of the Rings", "Fantasy", "9780544003415", true));
+      var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       var id = book.getId().intValue();
       // when
       client.perform(delete("/api/v1/books/{id}", id))

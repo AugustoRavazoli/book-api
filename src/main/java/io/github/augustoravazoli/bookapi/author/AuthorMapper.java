@@ -7,7 +7,6 @@ class AuthorMapper {
 
   public Author toEntity(AuthorRequest authorRequest) {
     return new Author(
-      null,
       authorRequest.name(),
       authorRequest.email()
     );
