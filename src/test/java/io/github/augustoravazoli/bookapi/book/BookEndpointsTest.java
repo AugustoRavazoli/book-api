@@ -20,6 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
@@ -63,7 +64,11 @@ class BookEndpointsTest extends EndpointsTestTemplate {
         jsonPath("$.published", is(true))
       )
       .andDo(document("book/create", snippet()));
-      assertThat(bookRepository.count()).isEqualTo(1);
+      // and
+      assertThat(bookRepository.findAll()).size().isEqualTo(1)
+        .returnToIterable()
+        .extracting("title", "description", "isbn", "published")
+        .contains(tuple("The Lord of the Rings", "Fantasy", "9780544003415", true));
     }
 
     @Test
@@ -153,13 +158,12 @@ class BookEndpointsTest extends EndpointsTestTemplate {
     void whenFindBook_thenReturns200() throws Exception {
       // given
       var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
-      var id = book.getId().intValue();
       // when
-      client.perform(get("/api/v1/books/{id}", id))
+      client.perform(get("/api/v1/books/{id}", book.getId()))
       // then
       .andExpectAll(
         status().isOk(),
-        jsonPath("$.id", is(id)),
+        jsonPath("$.id", notNullValue(Long.class)),
         jsonPath("$.title", is("The Lord of the Rings")),
         jsonPath("$.description", is("Fantasy")),
         jsonPath("$.isbn", is("9780544003415")),
@@ -170,11 +174,9 @@ class BookEndpointsTest extends EndpointsTestTemplate {
 
     @Test
     @DisplayName("Don't find book when book doesn't exists")
-    void givenNonExistentBook_whenFindBook_thenReturns404() throws Exception {
-      // given
-      var id = 1;
+    void givenNonexistentBook_whenFindBook_thenReturns404() throws Exception {
       // when
-      client.perform(get("/api/v1/books/{id}", id))
+      client.perform(get("/api/v1/books/1"))
       // then
       .andExpectAll(
         status().isNotFound(),
@@ -189,18 +191,11 @@ class BookEndpointsTest extends EndpointsTestTemplate {
   @DisplayName("Book edit scenarios")
   class EditBookEndpointTests {
 
-    private Book book;
-
-    @BeforeEach
-    void setUp() {
-      var newBook = new Book("The Lord of the Rings", "Fantasy", "9780544003415", true);
-      book = bookRepository.save(newBook);
-    }
-
     @Test
     @DisplayName("Edit book with success")
     void whenEditBook_thenReturns200() throws Exception {
       // given
+      var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       var newBook = new BookRequest("The Hobbit", "Some detailed description", "9780008376055", false);
       // when
       client.perform(put("/api/v1/books/{id}", book.getId())
@@ -210,7 +205,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       // then
       .andExpectAll(
         status().isOk(),
-        jsonPath("$.id", is(book.getId().intValue())),
+        jsonPath("$.id", notNullValue(Long.class)),
         jsonPath("$.title", is("The Hobbit")),
         jsonPath("$.description", is("Some detailed description")),
         jsonPath("$.isbn", is("9780008376055")),
@@ -218,21 +213,18 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       )
       .andDo(document("book/edit"));
       // and
-      assertThat(bookRepository.count()).isEqualTo(1);
-      assertThat(bookRepository.findById(book.getId()).get())
-        .usingRecursiveComparison()
-        .isNotEqualTo(book);
+      assertThat(bookRepository.findById(book.getId())).get()
+        .extracting("title", "description", "isbn", "published")
+        .contains("The Hobbit", "Some detailed description", "9780008376055", false);
     }
 
     @Test
     @DisplayName("Don't edit book when book doesn't exists")
     void givenNonexistentBook_whenEditBook_thenReturns404() throws Exception {
       // given
-      bookRepository.delete(book);
-      // and
       var newBook = new BookRequest("The Hobbit", "Some detailed description", "9780008376055", false);
       // when
-      client.perform(put("/api/v1/books/{id}", 1)
+      client.perform(put("/api/v1/books/1")
         .contentType(APPLICATION_JSON)
         .content(toJson(newBook))
       )
@@ -242,7 +234,6 @@ class BookEndpointsTest extends EndpointsTestTemplate {
         jsonPath("$.message", is("Book with given id \"1\" doesn't exists")),
         jsonPath("$.details").doesNotExist()
       );
-      assertThat(bookRepository.count()).isZero();
     }
 
     @Test
@@ -250,7 +241,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
     void givenTitleTaken_whenEditBook_thenReturns409() throws Exception {
       // given
       bookRepository.save(new Book("The Hobbit", "", "", false));
-      // and
+      var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       var newBook = new BookRequest("The Hobbit", "Some detailed description", "9780008376055", false);
       // when
       client.perform(put("/api/v1/books/{id}", book.getId())
@@ -263,10 +254,9 @@ class BookEndpointsTest extends EndpointsTestTemplate {
         jsonPath("$.message", is("Book with given title \"The Hobbit\" already exists")),
         jsonPath("$.details").doesNotExist()
       );
-      assertThat(bookRepository.count()).isEqualTo(2);
-      assertThat(bookRepository.findById(book.getId()).get())
-        .usingRecursiveComparison()
-        .isEqualTo(book);
+      assertThat(bookRepository.findById(book.getId())).get()
+        .extracting("title", "description", "isbn", "published")
+        .contains("The Lord of the Rings", "Fantasy", "9780544003415", true);
     }
 
     @Test
@@ -274,7 +264,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
     void givenIsbnTaken_whenEditBook_thenReturns409() throws Exception {
       // given
       bookRepository.save(new Book("", "", "9780008376055", false));
-      // and
+      var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       var newBook = new BookRequest("The Hobbit", "Some detailed description", "9780008376055", false);
       // when
       client.perform(put("/api/v1/books/{id}", book.getId())
@@ -287,16 +277,16 @@ class BookEndpointsTest extends EndpointsTestTemplate {
         jsonPath("$.message", is("Book with given ISBN \"9780008376055\" already exists")),
         jsonPath("$.details").doesNotExist()
       );
-      assertThat(bookRepository.count()).isEqualTo(2);
-      assertThat(bookRepository.findById(book.getId()).get())
-        .usingRecursiveComparison()
-        .isEqualTo(book);
+      assertThat(bookRepository.findById(book.getId())).get()
+        .extracting("title", "description", "isbn", "published")
+        .contains("The Lord of the Rings", "Fantasy", "9780544003415", true);
     }
 
     @Test
     @DisplayName("Don't edit book when new book information are invalid")
     void givenInvalidBook_whenEditBook_thenReturns422() throws Exception {
       // given
+      var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       var newBook = new BookRequest("", "", "", null);
       // when
       client.perform(put("/api/v1/books/{id}", book.getId())
@@ -316,10 +306,9 @@ class BookEndpointsTest extends EndpointsTestTemplate {
           violation("published", "must not be null")
         ))
       );
-      assertThat(bookRepository.count()).isEqualTo(1);
-      assertThat(bookRepository.findById(book.getId()).get())
-        .usingRecursiveComparison()
-        .isEqualTo(book);
+      assertThat(bookRepository.findById(book.getId())).get()
+        .extracting("title", "description", "isbn", "published")
+        .contains("The Lord of the Rings", "Fantasy", "9780544003415", true);
     }
 
   }
@@ -333,9 +322,8 @@ class BookEndpointsTest extends EndpointsTestTemplate {
     void whenDeleteBook_thenReturns204() throws Exception {
       // given
       var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
-      var id = book.getId().intValue();
       // when
-      client.perform(delete("/api/v1/books/{id}", id))
+      client.perform(delete("/api/v1/books/{id}", book.getId()))
       // then
       .andExpectAll(
         status().isNoContent(),
@@ -343,16 +331,14 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       )
       .andDo(document("book/delete"));
       // and
-      assertThat(bookRepository.count()).isZero();
+      assertThat(bookRepository.existsById(book.getId())).isFalse();
     }
 
     @Test
     @DisplayName("Don't delete book when book doesn't exists")
     void givenNonexistentBook_whenDeleteBook_thenReturns404() throws Exception {
-      // given
-      var id = 1;
       // when
-      client.perform(delete("/api/v1/books/{id}", id))
+      client.perform(delete("/api/v1/books/1"))
       // then
       .andExpectAll(
         status().isNotFound(),

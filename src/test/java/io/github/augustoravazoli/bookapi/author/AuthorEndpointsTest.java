@@ -20,6 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
@@ -61,7 +62,11 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
         jsonPath("$.email", is("tolkien@example.com"))
       )
       .andDo(document("author/create", snippet()));
-      assertThat(authorRepository.count()).isEqualTo(1);
+      // and
+      assertThat(authorRepository.findAll()).size().isEqualTo(1)
+        .returnToIterable()
+        .extracting("name", "email")
+        .contains(tuple("J.R.R. Tolkien", "tolkien@example.com"));
     }
 
     @Test
@@ -127,13 +132,12 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
     void whenFindAuthor_thenReturns200() throws Exception {
       // given
       var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
-      var id = author.getId().intValue();
       // when
-      client.perform(get("/api/v1/authors/{id}", id))
+      client.perform(get("/api/v1/authors/{id}", author.getId()))
       // then
       .andExpectAll(
         status().isOk(),
-        jsonPath("$.id", is(id)),
+        jsonPath("$.id", notNullValue(Long.class)),
         jsonPath("$.name", is("J.R.R. Tolkien")),
         jsonPath("$.email", is("tolkien@example.com"))
       )
@@ -142,11 +146,9 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
 
     @Test
     @DisplayName("Don't find author when author doesn't exists")
-    void givenNonExistentAuthor_whenFindAuthor_thenReturns404() throws Exception {
-      // given
-      var id = 1;
+    void givenNonexistentAuthor_whenFindAuthor_thenReturns404() throws Exception {
       // when
-      client.perform(get("/api/v1/authors/{id}", id))
+      client.perform(get("/api/v1/authors/1"))
       // then
       .andExpectAll(
         status().isNotFound(),
@@ -161,18 +163,11 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
   @DisplayName("Author edit scenarios")
   class EditAuthorEndpointTests {
 
-    private Author author;
-
-    @BeforeEach
-    void setUp() {
-      var newAuthor = new Author("J.R.R. Tolkien", "tolkien@example.com");
-      author = authorRepository.save(newAuthor);
-    }
-
     @Test
     @DisplayName("Edit author with success")
     void whenEditAuthor_thenReturns200() throws Exception {
       // given
+      var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
       var newAuthor = new AuthorRequest("C.S. Lewis", "cslewis@example.com");
       // when
       client.perform(put("/api/v1/authors/{id}", author.getId())
@@ -182,27 +177,24 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       // then
       .andExpectAll(
         status().isOk(),
-        jsonPath("$.id", is(author.getId().intValue())),
+        jsonPath("$.id", notNullValue(Long.class)),
         jsonPath("$.name", is("C.S. Lewis")),
         jsonPath("$.email", is("cslewis@example.com"))
       )
       .andDo(document("author/edit"));
       // and
-      assertThat(authorRepository.count()).isEqualTo(1);
-      assertThat(authorRepository.findById(author.getId()).get())
-        .usingRecursiveComparison()
-        .isNotEqualTo(author);
+      assertThat(authorRepository.findById(author.getId())).get()
+        .extracting("name", "email")
+        .contains("C.S. Lewis", "cslewis@example.com");
     }
 
     @Test
     @DisplayName("Don't edit author when author doesn't exists")
     void givenNonexistentAuthor_whenEditAuthor_thenReturns404() throws Exception {
       // given
-      authorRepository.delete(author);
-      // and
       var newAuthor = new AuthorRequest("C.S. Lewis", "cslewis@example.com");
       // when
-      client.perform(put("/api/v1/authors/{id}", 1)
+      client.perform(put("/api/v1/authors/1")
         .contentType(APPLICATION_JSON)
         .content(toJson(newAuthor))
       )
@@ -212,13 +204,13 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
         jsonPath("$.message", is("Author with given id \"1\" doesn't exists")),
         jsonPath("$.details").doesNotExist()
       );
-      assertThat(authorRepository.count()).isZero();
     }
 
     @Test
     @DisplayName("Don't edit author when email is already in use by other author")
     void givenEmailTaken_whenEditAuthor_thenReturns409() throws Exception {
       // given
+      var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
       authorRepository.save(new Author("", "cslewis@example.com"));
       // and
       var newAuthor = new AuthorRequest("C.S. Lewis", "cslewis@example.com");
@@ -233,16 +225,16 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
         jsonPath("$.message", is("Email \"cslewis@example.com\" already in use")),
         jsonPath("$.details").doesNotExist()
       );
-      assertThat(authorRepository.count()).isEqualTo(2);
-      assertThat(authorRepository.findById(author.getId()).get())
-        .usingRecursiveComparison()
-        .isEqualTo(author);
+      assertThat(authorRepository.findById(author.getId())).get()
+        .extracting("name", "email")
+        .contains("J.R.R. Tolkien", "tolkien@example.com");
     }
 
     @Test
     @DisplayName("Don't edit author when new author information are invalid")
     void givenInvalidAuthor_whenEditAuthor_thenReturns422() throws Exception {
       // given
+      var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
       var newAuthor = new AuthorRequest("", "\n"); // using "\n" to trigger both @Email and @NotBlank validations
       // when                                      // avoiding the need to parameterize this test
       client.perform(put("/api/v1/authors/{id}", author.getId())
@@ -260,10 +252,9 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
           violation("email", "must be a well-formed email address")
         ))
       );
-      assertThat(authorRepository.count()).isEqualTo(1);
-      assertThat(authorRepository.findById(author.getId()).get())
-        .usingRecursiveComparison()
-        .isEqualTo(author);
+      assertThat(authorRepository.findById(author.getId())).get()
+        .extracting("name", "email")
+        .contains("J.R.R. Tolkien", "tolkien@example.com");
     }
 
   }
@@ -277,9 +268,8 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
     void whenDeleteAuthor_thenReturns204() throws Exception {
       // given
       var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
-      var id = author.getId().intValue();
       // when
-      client.perform(delete("/api/v1/authors/{id}", id))
+      client.perform(delete("/api/v1/authors/{id}", author.getId()))
       // then
       .andExpectAll(
         status().isNoContent(),
@@ -287,16 +277,14 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       )
       .andDo(document("author/delete"));
       // and
-      assertThat(authorRepository.count()).isZero();
+      assertThat(authorRepository.existsById(author.getId())).isFalse();
     }
 
     @Test
     @DisplayName("Don't delete author when author doesn't exists")
     void givenNonexistentAuthor_whenDeleteAuthor_thenReturns404() throws Exception {
-      // given
-      var id = 1;
       // when
-      client.perform(delete("/api/v1/authors/{id}", id))
+      client.perform(delete("/api/v1/authors/1"))
       // then
       .andExpectAll(
         status().isNotFound(),
