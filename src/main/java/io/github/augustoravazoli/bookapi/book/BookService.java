@@ -68,4 +68,13 @@ class BookService {
     bookRepository.save(book);
   }
 
+  public void removeAuthorFromBook(long bookId, long authorId) {
+    var book = bookRepository.findById(bookId)
+      .orElseThrow(() -> new BookNotFoundException(bookId));
+    var author = authorRepository.findById(authorId)
+      .orElseThrow(() -> new AuthorNotFoundException(authorId));
+    book.removeAuthor(author);
+    bookRepository.save(book);
+  }
+
 }

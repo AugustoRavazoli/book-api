@@ -89,4 +89,9 @@ public class Book {
     author.getBooks().add(this);
   }
 
+  public void removeAuthor(Author author) {
+    authors.remove(author);
+    author.getBooks().remove(this);
+  }
+
 }

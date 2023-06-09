@@ -407,4 +407,62 @@ class BookEndpointsTest extends EndpointsTestTemplate {
 
   }
 
+  @Nested
+  @DisplayName("Remove author from book scenarios")
+  class RemoveAuthorFromBookEndpointTests {
+    
+    @Test
+    @DisplayName("Remove author from book with success")
+    void whenRemoveAuthorFromBook_thenReturns204() throws Exception {
+      // given
+      var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
+      var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
+      // and
+      book.addAuthor(author);
+      bookRepository.save(book);
+      // when
+      client.perform(delete("/api/v1/books/{book-id}/authors/{author-id}", book.getId(), author.getId()))
+      // then
+      .andExpectAll(
+        status().isNoContent(),
+        jsonPath("$").doesNotExist()
+      )
+      .andDo(document("book/remove-author"));
+      // and
+      assertThat(bookRepository.existsById(book.getId())).isTrue();
+      assertThat(authorRepository.existsById(author.getId())).isTrue();
+    }
+
+    @Test
+    @DisplayName("Don't remove author from book when book doesn't exists")
+    void givenNonexistentBook_whenRemoveAuthorFromBook_thenReturns404() throws Exception {
+      // given
+      var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
+      // when
+      client.perform(delete("/api/v1/books/1/authors/{author-id}", author.getId()))
+      // then
+      .andExpectAll(
+        status().isNotFound(),
+        jsonPath("$.message", is("Book with given id \"1\" doesn't exists")),
+        jsonPath("$.details").doesNotExist()
+      );
+    }
+
+    @Test
+    @DisplayName("Don't remove author from book when author doesn't exists")
+    void givenNonexistentAuthor_whenRemoveAuthorFromBook_thenReturns404() throws Exception {
+      // given
+      var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
+      // when
+      client.perform(delete("/api/v1/books/{book-id}/authors/1", book.getId()))
+      // then
+      .andExpectAll(
+        status().isNotFound(),
+        jsonPath("$.message", is("Author with given id \"1\" doesn't exists")),
+        jsonPath("$.details").doesNotExist()
+      );
+    }
+
+  }
+
 }

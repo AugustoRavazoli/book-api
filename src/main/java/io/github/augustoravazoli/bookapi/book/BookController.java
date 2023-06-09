@@ -78,4 +78,13 @@ class BookController {
     return ResponseEntity.noContent().build();
   }
 
+  @DeleteMapping("/{book-id}/authors/{author-id}")
+  public ResponseEntity<?> removeAuthorFromBook(
+    @PathVariable("book-id") long bookId,
+    @PathVariable("author-id") long authorId
+  ) {
+    bookService.removeAuthorFromBook(bookId, authorId);
+    return ResponseEntity.noContent().build();
+  }
+
 }
