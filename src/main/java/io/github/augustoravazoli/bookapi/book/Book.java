@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static jakarta.persistence.CascadeType.MERGE;
+import static jakarta.persistence.CascadeType.REMOVE;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
@@ -23,7 +24,7 @@ public class Book {
   @Column(nullable = false, unique = true)
   private String title;
 
-  @ManyToMany(cascade = MERGE)
+  @ManyToMany(cascade = { MERGE, REMOVE })
   private Set<Author> authors = new HashSet<>();
 
   @Column(nullable = false)

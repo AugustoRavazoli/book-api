@@ -27,6 +27,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
 import io.github.augustoravazoli.bookapi.EndpointsTestTemplate;
+import io.github.augustoravazoli.bookapi.book.Book;
+import io.github.augustoravazoli.bookapi.book.BookRepository;
 
 @SpringBootTest
 class AuthorEndpointsTest extends EndpointsTestTemplate {
@@ -34,9 +36,13 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
   @Autowired
   private AuthorRepository authorRepository;
 
+  @Autowired
+  private BookRepository bookRepository;
+
   @BeforeEach
   void setUp() {
     authorRepository.deleteAll();
+    bookRepository.deleteAll();
   }
 
   @Nested
@@ -289,6 +295,58 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       .andExpectAll(
         status().isNotFound(),
         jsonPath("$.message", is("Author with given id \"1\" doesn't exists")),
+        jsonPath("$.details").doesNotExist()
+      );
+    }
+
+  }
+
+  @Nested
+  @DisplayName("Add book to author scenarios")
+  class AddBookToAuthorEndpointTests {
+    
+    @Test
+    @DisplayName("Add book to author with success")
+    void whenAddBookToAuthor_thenReturns204() throws Exception {
+      // given
+      var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
+      var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
+      // when
+      client.perform(put("/api/v1/authors/{author-id}/books/{book-id}", author.getId(), book.getId()))
+      // then
+      .andExpectAll(
+        status().isNoContent(),
+        jsonPath("$").doesNotExist()
+      )
+      .andDo(document("author/add-book"));
+    }
+
+    @Test
+    @DisplayName("Don't add book to author when author doesn't exists")
+    void givenNonexistentAuthor_whenAddBookToAuthor_thenReturns404() throws Exception {
+      // given
+      var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
+      // when
+      client.perform(put("/api/v1/authors/1/books/{book-id}", book.getId()))
+      // then
+      .andExpectAll(
+        status().isNotFound(),
+        jsonPath("$.message", is("Author with given id \"1\" doesn't exists")),
+        jsonPath("$.details").doesNotExist()
+      );
+    }
+
+    @Test
+    @DisplayName("Don't add book to author when book doesn't exists")
+    void givenNonexistentBook_whenAddBookToAuthor_thenReturns404() throws Exception {
+      // given
+      var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
+      // when
+      client.perform(put("/api/v1/authors/{author-id}/books/1", author.getId()))
+      // then
+      .andExpectAll(
+        status().isNotFound(),
+        jsonPath("$.message", is("Book with given id \"1\" doesn't exists")),
         jsonPath("$.details").doesNotExist()
       );
     }

@@ -5,6 +5,8 @@ import java.util.Set;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import static jakarta.persistence.GenerationType.IDENTITY;
+import static jakarta.persistence.CascadeType.MERGE;
+import static jakarta.persistence.CascadeType.REMOVE;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
@@ -25,7 +27,7 @@ public class Author {
   @Column(nullable = false, unique = true)
   private String email;
 
-  @ManyToMany(mappedBy = "authors")
+  @ManyToMany(mappedBy = "authors", cascade = { MERGE, REMOVE })
   private Set<Book> books = new HashSet<>();
 
   public Author() {}
@@ -57,6 +59,11 @@ public class Author {
 
   public Set<Book> getBooks() {
     return books;
+  }
+
+  public void addBook(Book book) {
+    books.add(book);
+    book.getAuthors().add(this);
   }
 
 }

@@ -72,4 +72,13 @@ class AuthorController {
     return ResponseEntity.noContent().build();
   }
 
+  @PutMapping("/{author-id}/books/{book-id}")
+  public ResponseEntity<?> addBookToAuthor(
+    @PathVariable("author-id") long authorId,
+    @PathVariable("book-id") long bookId
+  ) {
+    authorService.addBookToAuthor(authorId, bookId);
+    return ResponseEntity.noContent().build();
+  }
+
 }

@@ -3,14 +3,19 @@ package io.github.augustoravazoli.bookapi.author;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import io.github.augustoravazoli.bookapi.book.BookNotFoundException;
+import io.github.augustoravazoli.bookapi.book.BookRepository;
+
 @Service
 class AuthorService {
 
   private final AuthorRepository authorRepository;
+  private final BookRepository bookRepository;
 
   @Autowired
-  public AuthorService(AuthorRepository authorRepository) {
+  public AuthorService(AuthorRepository authorRepository, BookRepository bookRepository) {
     this.authorRepository = authorRepository;
+    this.bookRepository = bookRepository;
   }
 
   public Author createAuthor(Author author) {
@@ -47,6 +52,15 @@ class AuthorService {
       throw new AuthorNotFoundException(id);
     }
     authorRepository.deleteById(id);
+  }
+
+  public void addBookToAuthor(long authorId, long bookId) {
+    var author = authorRepository.findById(authorId)
+      .orElseThrow(() -> new AuthorNotFoundException(authorId));
+    var book = bookRepository.findById(bookId)
+      .orElseThrow(() -> new BookNotFoundException(bookId));
+    author.addBook(book);
+    authorRepository.save(author);
   }
 
 }
