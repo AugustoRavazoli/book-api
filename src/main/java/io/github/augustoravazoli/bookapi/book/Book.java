@@ -1,15 +1,20 @@
 package io.github.augustoravazoli.bookapi.book;
 
+import java.util.HashSet;
+import java.util.Set;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import static jakarta.persistence.GenerationType.IDENTITY;
+import static jakarta.persistence.CascadeType.MERGE;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import io.github.augustoravazoli.bookapi.author.Author;
 
 @Table(name = "books")
 @Entity
-class Book {
+public class Book {
 
   @Id
   @GeneratedValue(strategy = IDENTITY)
@@ -17,6 +22,9 @@ class Book {
 
   @Column(nullable = false, unique = true)
   private String title;
+
+  @ManyToMany(cascade = MERGE)
+  private Set<Author> authors = new HashSet<>();
 
   @Column(nullable = false)
   private String description;
@@ -47,6 +55,10 @@ class Book {
     this.title = title;
   }
 
+  public Set<Author> getAuthors() {
+    return authors;
+  }
+
   public String getDescription() {
     return description;
   }
@@ -69,6 +81,11 @@ class Book {
 
   protected void setPublished(boolean published) {
     this.published = published;
+  }
+
+  public void addAuthor(Author author) {
+    authors.add(author);
+    author.getBooks().add(this);
   }
 
 }

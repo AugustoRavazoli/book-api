@@ -1,15 +1,19 @@
 package io.github.augustoravazoli.bookapi.author;
 
+import java.util.HashSet;
+import java.util.Set;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import io.github.augustoravazoli.bookapi.book.Book;
 
 @Table(name = "authors")
 @Entity
-class Author {
+public class Author {
 
   @Id
   @GeneratedValue(strategy = IDENTITY)
@@ -20,6 +24,9 @@ class Author {
 
   @Column(nullable = false, unique = true)
   private String email;
+
+  @ManyToMany(mappedBy = "authors")
+  private Set<Book> books = new HashSet<>();
 
   public Author() {}
 
@@ -46,6 +53,10 @@ class Author {
 
   protected void setEmail(String email) {
     this.email = email;
+  }
+
+  public Set<Book> getBooks() {
+    return books;
   }
 
 }
