@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.util.UriComponentsBuilder;
 import jakarta.validation.Valid;
+import io.github.augustoravazoli.bookapi.book.BookMapper;
 
 @RequestMapping("/api/v1/authors")
 @Controller
@@ -20,11 +21,13 @@ class AuthorController {
   
   private final AuthorService authorService;
   private final AuthorMapper authorMapper;
+  private final BookMapper bookMapper;
 
   @Autowired
-  public AuthorController(AuthorService authorService, AuthorMapper authorMapper) {
+  public AuthorController(AuthorService authorService, AuthorMapper authorMapper, BookMapper bookMapper) {
     this.authorService = authorService;
     this.authorMapper = authorMapper;
+    this.bookMapper = bookMapper;
   }
 
   @PostMapping
@@ -70,6 +73,15 @@ class AuthorController {
   public ResponseEntity<?> deleteAuthor(@PathVariable long id) {
     authorService.deleteAuthor(id); 
     return ResponseEntity.noContent().build();
+  }
+
+  @GetMapping("/{id}/books")
+  public ResponseEntity<?> findAuthorBooks(@PathVariable long id) {
+    var books = authorService.findAuthorBooks(id)
+      .stream()
+      .map(bookMapper::toResponse)
+      .toList();
+    return ResponseEntity.ok(books);
   }
 
   @PutMapping("/{author-id}/books/{book-id}")

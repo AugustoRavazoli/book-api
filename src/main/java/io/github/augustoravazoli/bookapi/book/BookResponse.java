@@ -1,6 +1,6 @@
 package io.github.augustoravazoli.bookapi.book;
 
-record BookResponse(
+public record BookResponse(
   long id,
   String title,
   String description,

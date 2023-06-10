@@ -1,7 +1,9 @@
 package io.github.augustoravazoli.bookapi.author;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import io.github.augustoravazoli.bookapi.book.Book;
 import io.github.augustoravazoli.bookapi.book.BookNotFoundException;
 import io.github.augustoravazoli.bookapi.book.BookRepository;
 
@@ -51,6 +53,13 @@ class AuthorService {
       throw new AuthorNotFoundException(id);
     }
     authorRepository.deleteById(id);
+  }
+
+  public List<Book> findAuthorBooks(long id) {
+    if (!authorRepository.existsById(id)) {
+      throw new AuthorNotFoundException(id);
+    }
+    return bookRepository.findAllByAuthorsId(id);
   }
 
   public void addBookToAuthor(long authorId, long bookId) {

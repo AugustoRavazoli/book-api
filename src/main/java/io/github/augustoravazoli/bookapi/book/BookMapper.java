@@ -3,7 +3,7 @@ package io.github.augustoravazoli.bookapi.book;
 import org.springframework.stereotype.Component;
 
 @Component
-class BookMapper {
+public class BookMapper {
 
   public Book toEntity(BookRequest bookRequest) {
     return new Book(
