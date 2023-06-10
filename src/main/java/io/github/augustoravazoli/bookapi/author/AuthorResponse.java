@@ -1,6 +1,6 @@
 package io.github.augustoravazoli.bookapi.author;
 
-record AuthorResponse(
+public record AuthorResponse(
   long id,
   String name,
   String email

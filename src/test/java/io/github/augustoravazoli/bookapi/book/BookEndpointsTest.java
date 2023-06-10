@@ -1,5 +1,6 @@
 package io.github.augustoravazoli.bookapi.book;
 
+import static java.util.Arrays.asList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -345,6 +346,48 @@ class BookEndpointsTest extends EndpointsTestTemplate {
     void givenNonexistentBook_whenDeleteBook_thenReturns404() throws Exception {
       // when
       client.perform(delete("/api/v1/books/1"))
+      // then
+      .andExpectAll(
+        status().isNotFound(),
+        jsonPath("$.message", is("Book with given id \"1\" doesn't exists")),
+        jsonPath("$.details").doesNotExist()
+      );
+    }
+
+  }
+  
+  @Nested
+  @DisplayName("Find book authors scenarios")
+  class FindBookAuthorsEndpointTests {
+
+    @Test
+    @DisplayName("Find book authors with success")
+    void whenFindBookAuthors_thenReturns200() throws Exception {
+      // given
+      var book = bookRepository.save(new Book("Design Patterns", "Some description", "9780201633610", true));
+      var authors = authorRepository.saveAll(asList(
+        new Author("Erich Gamma", "erich@example.com"),
+        new Author("Richard Helm", "richard@example.com"),
+        new Author("Ralph Johnson", "ralph@example.com"),
+        new Author("John Vlissides", "john@example.com")
+      ));
+      authors.forEach(author -> book.addAuthor(author));
+      bookRepository.save(book);
+      // when
+      client.perform(get("/api/v1/books/{id}/authors", book.getId()))
+      // then
+      .andExpectAll(
+        status().isOk(),
+        jsonPath("$", hasSize(4))
+      )
+      .andDo(document("book/find-authors"));
+    }
+
+    @Test
+    @DisplayName("Don't find book authors when book doesn't exists")
+    void givenNonexistentBook_whenFindBookAuthors_thenReturns404() throws Exception {
+      // when
+      client.perform(get("/api/v1/books/1/authors"))
       // then
       .andExpectAll(
         status().isNotFound(),

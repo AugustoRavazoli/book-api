@@ -3,7 +3,7 @@ package io.github.augustoravazoli.bookapi.author;
 import org.springframework.stereotype.Component;
 
 @Component
-class AuthorMapper {
+public class AuthorMapper {
 
   public Author toEntity(AuthorRequest authorRequest) {
     return new Author(

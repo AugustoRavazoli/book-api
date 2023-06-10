@@ -1,7 +1,9 @@
 package io.github.augustoravazoli.bookapi.book;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import io.github.augustoravazoli.bookapi.author.Author;
 import io.github.augustoravazoli.bookapi.author.AuthorNotFoundException;
 import io.github.augustoravazoli.bookapi.author.AuthorRepository;
 
@@ -37,10 +39,14 @@ class BookService {
     return bookRepository
       .findById(id)
       .map(book -> {
-        if (!newBook.getTitle().equals(book.getTitle()) && bookRepository.existsByTitle(newBook.getTitle())) {
+        if (!newBook.getTitle().equals(book.getTitle()) 
+          && bookRepository.existsByTitle(newBook.getTitle())
+        ) {
           throw new TitleAlreadyInUseException(newBook.getTitle());
         }
-        if (!newBook.getIsbn().equals(book.getIsbn()) && bookRepository.existsByIsbn(newBook.getIsbn())) {
+        if (!newBook.getIsbn().equals(book.getIsbn()) 
+          && bookRepository.existsByIsbn(newBook.getIsbn())
+        ) {
           throw new IsbnAlreadyInUseException(newBook.getIsbn());
         }
         book.setTitle(newBook.getTitle());
@@ -57,6 +63,13 @@ class BookService {
       throw new BookNotFoundException(id);
     }
     bookRepository.deleteById(id);
+  }
+
+  public List<Author> findBookAuthors(long id) {
+    if (!bookRepository.existsById(id)) {
+      throw new BookNotFoundException(id);
+    }
+    return authorRepository.findAllByBooksId(id); 
   }
 
   public void addAuthorToBook(long bookId, long authorId) {
