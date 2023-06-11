@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.restdocs.payload.RequestFieldsSnippet;
+import org.springframework.test.context.ActiveProfiles;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -33,6 +34,7 @@ import io.github.augustoravazoli.bookapi.author.Author;
 import io.github.augustoravazoli.bookapi.author.AuthorRepository;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class BookEndpointsTest extends EndpointsTestTemplate {
 
   @Autowired
