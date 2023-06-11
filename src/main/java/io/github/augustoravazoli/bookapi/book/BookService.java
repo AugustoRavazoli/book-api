@@ -2,6 +2,8 @@ package io.github.augustoravazoli.bookapi.book;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import io.github.augustoravazoli.bookapi.author.Author;
 import io.github.augustoravazoli.bookapi.author.AuthorNotFoundException;
@@ -33,6 +35,10 @@ class BookService {
     return bookRepository
       .findById(id)
       .orElseThrow(() -> new BookNotFoundException(id));
+  }
+
+  public Page<Book> findAllBooks(Pageable page) {
+    return bookRepository.findAll(page);
   }
 
   public Book editBook(long id, Book newBook) {

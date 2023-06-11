@@ -2,6 +2,7 @@ package io.github.augustoravazoli.bookapi.book;
 
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,6 +54,15 @@ class BookController {
       .findAny()
       .get();
     return ResponseEntity.ok(book);
+  }
+
+  @GetMapping
+  public ResponseEntity<?> findAllBooks(Pageable page) {
+    var books = bookService.findAllBooks(page)
+      .map(bookMapper::toResponse);
+    return ResponseEntity.ok()
+      .header("X-Total-Count", String.valueOf(books.getTotalElements()))
+      .body(books.getContent());
   }
 
   @PutMapping("/{id}")

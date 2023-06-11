@@ -13,6 +13,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.requestF
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -189,6 +190,56 @@ class BookEndpointsTest extends EndpointsTestTemplate {
         status().isNotFound(),
         jsonPath("$.message", is("Book with given id \"1\" doesn't exists")),
         jsonPath("$.details").doesNotExist()
+      );
+    }
+
+  }
+
+  @Nested
+  @DisplayName("Book find all scenarios")
+  class FindAllBooksEndpointTests {
+    
+    @Test
+    @DisplayName("Find all books with success")
+    void whenFindAllBooks_thenReturns200() throws Exception {
+      // given
+      bookRepository.saveAll(asList(
+        new Book("The Lord of the Rings", "Fantasy", "9780544003415", true),
+        new Book("The Hobbit", "Some detailed description", "9780008376055", false),
+        new Book("The Silmarillion", "description", "9780618391110", true),
+        new Book("The Chronicles of Narnia", "description again", "9780060847133", false)
+      ));
+      // when
+      client.perform(get("/api/v1/books"))
+      // then
+      .andExpectAll(
+        status().isOk(),
+        header().string("X-Total-Count", "4"),
+        jsonPath("$", hasSize(4))
+      )
+      .andDo(document("book/find-all"));
+    }
+
+    @Test
+    @DisplayName("Find all books paginated with success")
+    void givenPage_whenFindAllBooks_thenReturns200() throws Exception {
+      // given
+      bookRepository.saveAll(asList(
+        new Book("The Lord of the Rings", "Fantasy", "9780544003415", true),
+        new Book("The Hobbit", "Some detailed description", "9780008376055", false),
+        new Book("The Silmarillion", "description", "9780618391110", true),
+        new Book("The Chronicles of Narnia", "description again", "9780060847133", false)
+      ));
+      // when
+      client.perform(get("/api/v1/books")
+        .param("page", "0")
+        .param("size", "2")
+      )
+      // then
+      .andExpectAll(
+        status().isOk(),
+        header().string("X-Total-Count", "4"),
+        jsonPath("$", hasSize(2))
       );
     }
 
