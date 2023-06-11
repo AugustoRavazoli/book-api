@@ -5,6 +5,10 @@ plugins {
 	id 'org.asciidoctor.jvm.convert' version '3.3.2'
 }
 
+configurations {
+  asciidoctorExt
+}
+
 group = 'io.github.augustoravazoli'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '17'
@@ -14,7 +18,7 @@ repositories {
 }
 
 ext {
-	set('snippetsDir', file("build/generated-snippets"))
+  snippetsDir = file('build/generated-snippets')
 }
 
 dependencies {
@@ -25,6 +29,7 @@ dependencies {
 	runtimeOnly 'com.h2database:h2'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+  asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
 }
 
 tasks.named('test') {
@@ -34,5 +39,6 @@ tasks.named('test') {
 
 tasks.named('asciidoctor') {
 	inputs.dir snippetsDir
+  configurations 'asciidoctorExt'
 	dependsOn test
 }
