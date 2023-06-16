@@ -9,11 +9,13 @@ import static jakarta.persistence.CascadeType.MERGE;
 import static jakarta.persistence.CascadeType.REMOVE;
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import io.github.augustoravazoli.bookapi.author.Author;
 
-@Table(name = "books")
+@Table(name = "book")
 @Entity
 public class Book {
 
@@ -25,6 +27,11 @@ public class Book {
   private String title;
 
   @ManyToMany(cascade = { MERGE, REMOVE })
+  @JoinTable(
+    name = "book_author",
+    joinColumns = @JoinColumn(name = "book_id"),
+    inverseJoinColumns = @JoinColumn(name = "author_id")
+  )
   private Set<Author> authors = new HashSet<>();
 
   @Column(nullable = false)

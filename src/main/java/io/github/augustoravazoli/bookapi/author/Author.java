@@ -13,7 +13,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import io.github.augustoravazoli.bookapi.book.Book;
 
-@Table(name = "authors")
+@Table(name = "author")
 @Entity
 public class Author {
 
