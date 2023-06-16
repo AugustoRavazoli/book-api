@@ -58,14 +58,14 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       // given
       var newAuthor = new AuthorRequest("J.R.R. Tolkien", "tolkien@example.com");
       // when
-      client.perform(post("/api/v1/authors")
+      client.perform(post("/api/authors")
         .contentType(APPLICATION_JSON)
         .content(toJson(newAuthor))
       )
       // then
       .andExpectAll(
         status().isCreated(),
-        redirectedUrlPattern("**/api/v1/authors/*"),
+        redirectedUrlPattern("**/api/authors/*"),
         jsonPath("$.id", notNullValue(Long.class)),
         jsonPath("$.name", is("J.R.R. Tolkien")),
         jsonPath("$.email", is("tolkien@example.com"))
@@ -85,7 +85,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
       var newAuthor = new AuthorRequest("C.S. Lewis", "tolkien@example.com");
       // when
-      client.perform(post("/api/v1/authors")
+      client.perform(post("/api/authors")
         .contentType(APPLICATION_JSON)
         .content(toJson(newAuthor))
       )
@@ -104,7 +104,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       // given
       var newAuthor = new AuthorRequest("", "\n"); // using "\n" to trigger both @Email and @NotBlank validations
       // when                                      // avoiding the need to parameterize this test
-      client.perform(post("/api/v1/authors")
+      client.perform(post("/api/authors")
         .contentType(APPLICATION_JSON)
         .content(toJson(newAuthor))
       )
@@ -142,7 +142,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       // given
       var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
       // when
-      client.perform(get("/api/v1/authors/{id}", author.getId()))
+      client.perform(get("/api/authors/{id}", author.getId()))
       // then
       .andExpectAll(
         status().isOk(),
@@ -157,7 +157,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
     @DisplayName("Don't find author when author doesn't exists")
     void givenNonexistentAuthor_whenFindAuthor_thenReturns404() throws Exception {
       // when
-      client.perform(get("/api/v1/authors/1"))
+      client.perform(get("/api/authors/1"))
       // then
       .andExpectAll(
         status().isNotFound(),
@@ -179,7 +179,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
       var newAuthor = new AuthorRequest("C.S. Lewis", "cslewis@example.com");
       // when
-      client.perform(put("/api/v1/authors/{id}", author.getId())
+      client.perform(put("/api/authors/{id}", author.getId())
         .contentType(APPLICATION_JSON)
         .content(toJson(newAuthor))
       )
@@ -203,7 +203,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       // given
       var newAuthor = new AuthorRequest("C.S. Lewis", "cslewis@example.com");
       // when
-      client.perform(put("/api/v1/authors/1")
+      client.perform(put("/api/authors/1")
         .contentType(APPLICATION_JSON)
         .content(toJson(newAuthor))
       )
@@ -224,7 +224,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       // and
       var newAuthor = new AuthorRequest("C.S. Lewis", "cslewis@example.com");
       // when
-      client.perform(put("/api/v1/authors/{id}", author.getId())
+      client.perform(put("/api/authors/{id}", author.getId())
         .contentType(APPLICATION_JSON)
         .content(toJson(newAuthor))
       )
@@ -246,7 +246,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
       var newAuthor = new AuthorRequest("", "\n"); // using "\n" to trigger both @Email and @NotBlank validations
       // when                                      // avoiding the need to parameterize this test
-      client.perform(put("/api/v1/authors/{id}", author.getId())
+      client.perform(put("/api/authors/{id}", author.getId())
         .contentType(APPLICATION_JSON)
         .content(toJson(newAuthor))
       )
@@ -278,7 +278,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       // given
       var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
       // when
-      client.perform(delete("/api/v1/authors/{id}", author.getId()))
+      client.perform(delete("/api/authors/{id}", author.getId()))
       // then
       .andExpectAll(
         status().isNoContent(),
@@ -293,7 +293,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
     @DisplayName("Don't delete author when author doesn't exists")
     void givenNonexistentAuthor_whenDeleteAuthor_thenReturns404() throws Exception {
       // when
-      client.perform(delete("/api/v1/authors/1"))
+      client.perform(delete("/api/authors/1"))
       // then
       .andExpectAll(
         status().isNotFound(),
@@ -321,7 +321,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       books.forEach(book -> author.addBook(book));
       authorRepository.save(author);
       // when
-      client.perform(get("/api/v1/authors/{id}/books", author.getId()))
+      client.perform(get("/api/authors/{id}/books", author.getId()))
       // then
       .andExpectAll(
         status().isOk(),
@@ -334,7 +334,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
     @DisplayName("Don't find author books when author doesn't exists")
     void givenNonexistentAuthor_whenFindAuthorBooks_thenReturns404() throws Exception {
       // when
-      client.perform(get("/api/v1/authors/1/books"))
+      client.perform(get("/api/authors/1/books"))
       // then
       .andExpectAll(
         status().isNotFound(),
@@ -356,7 +356,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
       var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       // when
-      client.perform(put("/api/v1/authors/{author-id}/books/{book-id}", author.getId(), book.getId()))
+      client.perform(put("/api/authors/{author-id}/books/{book-id}", author.getId(), book.getId()))
       // then
       .andExpectAll(
         status().isNoContent(),
@@ -371,7 +371,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       // given
       var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       // when
-      client.perform(put("/api/v1/authors/1/books/{book-id}", book.getId()))
+      client.perform(put("/api/authors/1/books/{book-id}", book.getId()))
       // then
       .andExpectAll(
         status().isNotFound(),
@@ -386,7 +386,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       // given
       var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
       // when
-      client.perform(put("/api/v1/authors/{author-id}/books/1", author.getId()))
+      client.perform(put("/api/authors/{author-id}/books/1", author.getId()))
       // then
       .andExpectAll(
         status().isNotFound(),
@@ -411,7 +411,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       author.addBook(book);
       authorRepository.save(author);
       // when
-      client.perform(delete("/api/v1/authors/{author-id}/books/{book-id}", author.getId(), book.getId()))
+      client.perform(delete("/api/authors/{author-id}/books/{book-id}", author.getId(), book.getId()))
       // then
       .andExpectAll(
         status().isNoContent(),
@@ -429,7 +429,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       // given
       var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       // when
-      client.perform(delete("/api/v1/authors/1/books/{book-id}", book.getId()))
+      client.perform(delete("/api/authors/1/books/{book-id}", book.getId()))
       // then
       .andExpectAll(
         status().isNotFound(),
@@ -444,7 +444,7 @@ class AuthorEndpointsTest extends EndpointsTestTemplate {
       // given
       var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
       // when
-      client.perform(delete("/api/v1/authors/{author-id}/books/1", author.getId()))
+      client.perform(delete("/api/authors/{author-id}/books/1", author.getId()))
       // then
       .andExpectAll(
         status().isNotFound(),

@@ -16,7 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import jakarta.validation.Valid;
 import io.github.augustoravazoli.bookapi.author.AuthorMapper;
 
-@RequestMapping("/api/v1/books")
+@RequestMapping("/api/books")
 @Controller
 class BookController {
 
@@ -40,7 +40,7 @@ class BookController {
       .findAny()
       .get();
     var location = builder
-      .path("/api/v1/books/{id}")
+      .path("/api/books/{id}")
       .buildAndExpand(savedBook.id())
       .toUri();
     return ResponseEntity.created(location).body(savedBook);

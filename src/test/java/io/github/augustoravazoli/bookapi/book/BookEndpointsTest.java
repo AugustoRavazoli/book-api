@@ -59,14 +59,14 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       // given
       var newBook = new BookRequest("The Lord of the Rings", "Fantasy", "9780544003415", true);
       // when
-      client.perform(post("/api/v1/books")
+      client.perform(post("/api/books")
         .contentType(APPLICATION_JSON)
         .content(toJson(newBook))
       )
       // then
       .andExpectAll(
         status().isCreated(),
-        redirectedUrlPattern("**/api/v1/books/*"),
+        redirectedUrlPattern("**/api/books/*"),
         jsonPath("$.id", notNullValue(Long.class)),
         jsonPath("$.title", is("The Lord of the Rings")),
         jsonPath("$.description", is("Fantasy")),
@@ -88,7 +88,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       var newBook = new BookRequest("The Lord of the Rings", "Fantasy", "9780008376055", false);
       // when
-      client.perform(post("/api/v1/books")
+      client.perform(post("/api/books")
         .contentType(APPLICATION_JSON)
         .content(toJson(newBook))
       )
@@ -108,7 +108,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       var newBook = new BookRequest("The Hobbit", "Fantasy", "9780544003415", false);
       // when
-      client.perform(post("/api/v1/books")
+      client.perform(post("/api/books")
         .contentType(APPLICATION_JSON)
         .content(toJson(newBook))
       )
@@ -127,7 +127,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       // given
       var newBook = new BookRequest("", "", "", null);
       // when
-      client.perform(post("/api/v1/books")
+      client.perform(post("/api/books")
         .contentType(APPLICATION_JSON)
         .content(toJson(newBook))
       )
@@ -169,7 +169,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       // given
       var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       // when
-      client.perform(get("/api/v1/books/{id}", book.getId()))
+      client.perform(get("/api/books/{id}", book.getId()))
       // then
       .andExpectAll(
         status().isOk(),
@@ -186,7 +186,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
     @DisplayName("Don't find book when book doesn't exists")
     void givenNonexistentBook_whenFindBook_thenReturns404() throws Exception {
       // when
-      client.perform(get("/api/v1/books/1"))
+      client.perform(get("/api/books/1"))
       // then
       .andExpectAll(
         status().isNotFound(),
@@ -212,7 +212,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
         new Book("The Chronicles of Narnia", "description again", "9780060847133", false)
       ));
       // when
-      client.perform(get("/api/v1/books"))
+      client.perform(get("/api/books"))
       // then
       .andExpectAll(
         status().isOk(),
@@ -233,7 +233,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
         new Book("The Chronicles of Narnia", "description again", "9780060847133", false)
       ));
       // when
-      client.perform(get("/api/v1/books")
+      client.perform(get("/api/books")
         .param("page", "0")
         .param("size", "2")
       )
@@ -258,7 +258,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       var newBook = new BookRequest("The Hobbit", "Some detailed description", "9780008376055", false);
       // when
-      client.perform(put("/api/v1/books/{id}", book.getId())
+      client.perform(put("/api/books/{id}", book.getId())
         .contentType(APPLICATION_JSON)
         .content(toJson(newBook))
       )
@@ -284,7 +284,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       // given
       var newBook = new BookRequest("The Hobbit", "Some detailed description", "9780008376055", false);
       // when
-      client.perform(put("/api/v1/books/1")
+      client.perform(put("/api/books/1")
         .contentType(APPLICATION_JSON)
         .content(toJson(newBook))
       )
@@ -304,7 +304,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       var newBook = new BookRequest("The Hobbit", "Some detailed description", "9780008376055", false);
       // when
-      client.perform(put("/api/v1/books/{id}", book.getId())
+      client.perform(put("/api/books/{id}", book.getId())
         .contentType(APPLICATION_JSON)
         .content(toJson(newBook))
       )
@@ -327,7 +327,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       var newBook = new BookRequest("The Hobbit", "Some detailed description", "9780008376055", false);
       // when
-      client.perform(put("/api/v1/books/{id}", book.getId())
+      client.perform(put("/api/books/{id}", book.getId())
         .contentType(APPLICATION_JSON)
         .content(toJson(newBook))
       )
@@ -349,7 +349,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       var newBook = new BookRequest("", "", "", null);
       // when
-      client.perform(put("/api/v1/books/{id}", book.getId())
+      client.perform(put("/api/books/{id}", book.getId())
         .contentType(APPLICATION_JSON)
         .content(toJson(newBook))
       )
@@ -383,7 +383,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       // given
       var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       // when
-      client.perform(delete("/api/v1/books/{id}", book.getId()))
+      client.perform(delete("/api/books/{id}", book.getId()))
       // then
       .andExpectAll(
         status().isNoContent(),
@@ -398,7 +398,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
     @DisplayName("Don't delete book when book doesn't exists")
     void givenNonexistentBook_whenDeleteBook_thenReturns404() throws Exception {
       // when
-      client.perform(delete("/api/v1/books/1"))
+      client.perform(delete("/api/books/1"))
       // then
       .andExpectAll(
         status().isNotFound(),
@@ -427,7 +427,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       authors.forEach(author -> book.addAuthor(author));
       bookRepository.save(book);
       // when
-      client.perform(get("/api/v1/books/{id}/authors", book.getId()))
+      client.perform(get("/api/books/{id}/authors", book.getId()))
       // then
       .andExpectAll(
         status().isOk(),
@@ -440,7 +440,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
     @DisplayName("Don't find book authors when book doesn't exists")
     void givenNonexistentBook_whenFindBookAuthors_thenReturns404() throws Exception {
       // when
-      client.perform(get("/api/v1/books/1/authors"))
+      client.perform(get("/api/books/1/authors"))
       // then
       .andExpectAll(
         status().isNotFound(),
@@ -462,7 +462,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
       // when
-      client.perform(put("/api/v1/books/{book-id}/authors/{author-id}", book.getId(), author.getId()))
+      client.perform(put("/api/books/{book-id}/authors/{author-id}", book.getId(), author.getId()))
       // then
       .andExpectAll(
         status().isNoContent(),
@@ -477,7 +477,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       // given
       var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
       // when
-      client.perform(put("/api/v1/books/1/authors/{author-id}", author.getId()))
+      client.perform(put("/api/books/1/authors/{author-id}", author.getId()))
       // then
       .andExpectAll(
         status().isNotFound(),
@@ -492,7 +492,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       // given
       var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       // when
-      client.perform(put("/api/v1/books/{book-id}/authors/1", book.getId()))
+      client.perform(put("/api/books/{book-id}/authors/1", book.getId()))
       // then
       .andExpectAll(
         status().isNotFound(),
@@ -517,7 +517,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       book.addAuthor(author);
       bookRepository.save(book);
       // when
-      client.perform(delete("/api/v1/books/{book-id}/authors/{author-id}", book.getId(), author.getId()))
+      client.perform(delete("/api/books/{book-id}/authors/{author-id}", book.getId(), author.getId()))
       // then
       .andExpectAll(
         status().isNoContent(),
@@ -535,7 +535,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       // given
       var author = authorRepository.save(new Author("J.R.R. Tolkien", "tolkien@example.com"));
       // when
-      client.perform(delete("/api/v1/books/1/authors/{author-id}", author.getId()))
+      client.perform(delete("/api/books/1/authors/{author-id}", author.getId()))
       // then
       .andExpectAll(
         status().isNotFound(),
@@ -550,7 +550,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
       // given
       var book = bookRepository.save(new Book("The Lord of the Rings", "Fantasy", "9780544003415", true));
       // when
-      client.perform(delete("/api/v1/books/{book-id}/authors/1", book.getId()))
+      client.perform(delete("/api/books/{book-id}/authors/1", book.getId()))
       // then
       .andExpectAll(
         status().isNotFound(),
