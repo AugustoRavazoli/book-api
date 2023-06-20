@@ -1,7 +1,6 @@
 package io.github.augustoravazoli.bookapi.author;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import io.github.augustoravazoli.bookapi.book.Book;
 import io.github.augustoravazoli.bookapi.book.BookNotFoundException;
@@ -13,7 +12,6 @@ class AuthorService {
   private final AuthorRepository authorRepository;
   private final BookRepository bookRepository;
 
-  @Autowired
   public AuthorService(AuthorRepository authorRepository, BookRepository bookRepository) {
     this.authorRepository = authorRepository;
     this.bookRepository = bookRepository;

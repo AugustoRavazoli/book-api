@@ -1,7 +1,6 @@
 package io.github.augustoravazoli.bookapi.author;
 
 import java.util.stream.Stream;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +22,6 @@ class AuthorController {
   private final AuthorMapper authorMapper;
   private final BookMapper bookMapper;
 
-  @Autowired
   public AuthorController(AuthorService authorService, AuthorMapper authorMapper, BookMapper bookMapper) {
     this.authorService = authorService;
     this.authorMapper = authorMapper;

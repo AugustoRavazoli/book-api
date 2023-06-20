@@ -1,7 +1,6 @@
 package io.github.augustoravazoli.bookapi.book;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,7 +14,6 @@ class BookService {
   private final BookRepository bookRepository;
   private final AuthorRepository authorRepository;
 
-  @Autowired
   public BookService(BookRepository bookRepository, AuthorRepository authorRepository) {
     this.bookRepository = bookRepository;
     this.authorRepository = authorRepository;
