@@ -18,7 +18,6 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 import static org.springframework.restdocs.snippet.Attributes.key;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.modifyUris;
 import org.springframework.restdocs.constraints.ConstraintDescriptions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,7 +36,7 @@ public abstract class EndpointsTestTemplate {
     client = MockMvcBuilders.webAppContextSetup(context)
       .apply(documentationConfiguration(provider)
         .operationPreprocessors()
-        .withRequestDefaults(prettyPrint(), modifyUris().host("example.com").removePort())
+        .withRequestDefaults(prettyPrint())
         .withResponseDefaults(prettyPrint())
       )
       .build();
