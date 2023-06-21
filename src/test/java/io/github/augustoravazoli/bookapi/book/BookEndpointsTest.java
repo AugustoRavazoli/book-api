@@ -9,7 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.restdocs.payload.RequestFieldsSnippet;
+import org.springframework.restdocs.request.QueryParametersSnippet;
 import org.springframework.test.context.ActiveProfiles;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -200,7 +203,7 @@ class BookEndpointsTest extends EndpointsTestTemplate {
   @Nested
   @DisplayName("Book find all scenarios")
   class FindAllBooksEndpointTests {
-    
+
     @Test
     @DisplayName("Find all books with success")
     void whenFindAllBooks_thenReturns200() throws Exception {
@@ -212,36 +215,25 @@ class BookEndpointsTest extends EndpointsTestTemplate {
         new Book("The Chronicles of Narnia", "description again", "9780060847133", false)
       ));
       // when
-      client.perform(get("/api/books"))
-      // then
-      .andExpectAll(
-        status().isOk(),
-        header().string("X-Total-Count", "4"),
-        jsonPath("$", hasSize(4))
-      )
-      .andDo(document("book/find-all"));
-    }
-
-    @Test
-    @DisplayName("Find all books paginated with success")
-    void givenPage_whenFindAllBooks_thenReturns200() throws Exception {
-      // given
-      bookRepository.saveAll(asList(
-        new Book("The Lord of the Rings", "Fantasy", "9780544003415", true),
-        new Book("The Hobbit", "Some detailed description", "9780008376055", false),
-        new Book("The Silmarillion", "description", "9780618391110", true),
-        new Book("The Chronicles of Narnia", "description again", "9780060847133", false)
-      ));
-      // when
       client.perform(get("/api/books")
         .param("page", "0")
         .param("size", "2")
+        .param("sort", "title")
       )
       // then
       .andExpectAll(
         status().isOk(),
         header().string("X-Total-Count", "4"),
         jsonPath("$", hasSize(2))
+      )
+      .andDo(document("book/find-all", snippet()));
+    }
+
+    private QueryParametersSnippet snippet() {
+      return queryParameters(
+        parameterWithName("page").description("The page to retrieve"),
+        parameterWithName("size").description("Entries per page"),
+        parameterWithName("sort").description("Field to be sorted")
       );
     }
 
