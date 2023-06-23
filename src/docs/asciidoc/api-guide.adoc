@@ -1,0 +1,200 @@
+= Book API
+Augusto Ravazoli;
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 3
+:sectlinks:
+:sectnums:
+
+== Overview
+
+Book API is a simple API for managing books and authors, it allows you to create, read, update and delete
+both books and authors. You can also link and unlink them, as well as retrieve authors of a book and vice versa. 
+
+=== Usage of HTTP Verbs
+
+The following table describes how the Book API interprets the HTTP verbs.
+
+.HTTP Verbs
+|===
+|HTTP Verb | Usage
+
+|GET
+|GET is used to retrieve information.
+
+|POST
+|POST is used to create resources.
+
+|PUT
+|PUT is used to update or link resources.
+
+|DELETE
+|DELETE is used to delete or unlink resources.
+|===
+
+=== Error Handling
+
+==== Successful Requests
+
+Successful requests return a response with HTTP status 200 (OK) or 201 (CREATED) or 204 (NO CONTENT). 
+The response body contains a JSON structure, except for 204 status responses.
+
+==== Validation Errors
+
+POST requests against the Book API expect a JSON structure in the request body. 
+PUT requests also expect a JSON structure, except for linking requests. 
+GET, PUT, and DELETE requests expect to have a valid path variable. 
+If the JSON structure contains invalid values, the API returns a response 
+with HTTP status 422 (UNPROCESSABLE ENTITY) that includes an error 
+JSON structure object with a message field and a possible array of errors.
+
+==== General Errors
+
+If an unexpected error occurs during the processing of a request, 
+the Book API returns a response with HTTP status 500 (INTERNAL SERVER ERROR).
+
+== Resources
+
+The Book API is guided by resources. 
+The following sections describe the resources of the API.
+
+=== Book
+
+This section describes the book resource and its endpoints.
+
+==== Structure
+[cols="15,15,25,45"]
+include::{snippets}/book/create/request-fields.adoc[]
+
+==== Creating a book
+
+Example request
+include::{snippets}/book/create/http-request.adoc[]
+
+Example response
+include::{snippets}/book/create/http-response.adoc[]
+
+==== Finding a book
+
+Example request
+include::{snippets}/book/find/http-request.adoc[]
+
+Example response
+include::{snippets}/book/find/http-response.adoc[]
+
+==== Finding all books
+
+Query parameters
+include::{snippets}/book/find-all/query-parameters.adoc[]
+
+Example request
+include::{snippets}/book/find-all/http-request.adoc[]
+
+Example response
+include::{snippets}/book/find-all/http-response.adoc[]
+
+==== Editing a book
+
+Example request
+include::{snippets}/book/edit/http-request.adoc[]
+
+Example response
+include::{snippets}/book/edit/http-response.adoc[]
+
+==== Deleting a book
+
+Example request
+include::{snippets}/book/delete/http-request.adoc[]
+
+Example response
+include::{snippets}/book/delete/http-response.adoc[]
+
+==== Finding book authors
+
+Example request
+include::{snippets}/book/find-authors/http-request.adoc[]
+
+Example response
+include::{snippets}/book/find-authors/http-response.adoc[]
+
+==== Adding an author to a book
+
+Example request
+include::{snippets}/book/add-author/http-request.adoc[]
+
+Example response
+include::{snippets}/book/add-author/http-response.adoc[]
+
+==== Removing an author from a book
+
+Example request
+include::{snippets}/book/remove-author/http-request.adoc[]
+
+Example response
+include::{snippets}/book/remove-author/http-response.adoc[]
+
+=== Author
+
+This section describes the author resource and its endpoints.
+
+==== Structure
+[cols="15,15,25,45"]
+include::{snippets}/author/create/request-fields.adoc[]
+
+==== Creating an author
+
+Example request
+include::{snippets}/author/create/http-request.adoc[]
+
+Example response
+include::{snippets}/author/create/http-response.adoc[]
+
+==== Finding an author
+
+Example request
+include::{snippets}/author/find/http-request.adoc[]
+
+Example response
+include::{snippets}/author/find/http-response.adoc[]
+
+==== Editing an author
+
+Example request
+include::{snippets}/author/edit/http-request.adoc[]
+
+Example response
+include::{snippets}/author/edit/http-response.adoc[]
+
+==== Deleting an author
+
+Example request
+include::{snippets}/author/delete/http-request.adoc[]
+
+Example response
+include::{snippets}/author/delete/http-response.adoc[]
+
+==== Finding author books
+
+Example request
+include::{snippets}/author/find-books/http-request.adoc[]
+
+Example response
+include::{snippets}/author/find-books/http-response.adoc[]
+
+==== Adding a book to an author
+
+Example request
+include::{snippets}/author/add-book/http-request.adoc[]
+
+Example response
+include::{snippets}/author/add-book/http-response.adoc[]
+
+==== Removing a book from an author
+
+Example request
+include::{snippets}/author/remove-book/http-request.adoc[]
+
+Example response
+include::{snippets}/author/remove-book/http-response.adoc[]
